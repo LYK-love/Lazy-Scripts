@@ -2,17 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import math
+
 
 '''
-RSA工具, 但是求幂操作太慢了....
+RSA工具, 使用扩展欧几里得算法来计算d
 '''
+
 __author__ = "LYK-love"
 
 def letter2numeric(letter):
     '''
     get numeric representation of a lower case letter, 
-    a == 1, b == 2, ..., etc
+    a == 97, b == 98, ..., etc
     '''
     return ord(letter)
 
@@ -67,15 +68,24 @@ def compute_phi_n(n):
     
     return len(co_primes)
 
+# 用于扩展欧几里得算法的 Python 程序
+def extended_gcd(a, b):
+    if a == 0:
+        return b, 0, 1
+    else:
+        gcd, x, y = extended_gcd(b % a, a)
+        return gcd, y - (b // a) * x, x
 
 def get_one_mod_reverse_num(a,n):
     '''
-    计算a相对于n的模反元素
+    计算a相对于n的模反元素, 这里用了扩展欧几里得算法
     $ab \equiv 1 \mod n$
     '''
-    d = int( math.pow(a, compute_phi_n(n) - 1) )
-    while d - n >= 0:
-        d -= n
+    
+    gcd, x, y = extended_gcd(a,n)
+    d = x
+    while d <= 1:
+        d += n
     return d
     
 
@@ -110,19 +120,23 @@ class Private_Key(object):
             
 
 def choose_prime(prime_name, default_value):
-    p = int(input("{0} =  ".format(prime_name)) or default_value )
-    if not is_prime(p) :
-        raise Exception("{0} must be a large prime, but u input {1}".format(prime_name, p)  )
-
-    print( p )
+    '''
+    @Deprecated
+    let user choose q and p.
+    NB: n = p*q should larger than any character which user inputs. \\
+        So you had better make p and q may  as larger as possible.
+    '''
+    p = int(input("{0} = ".format(prime_name)) or default_value )
+    if not is_prime(p) or p <= 17:
+        raise Exception("{0} must be a large prime, your input is {1}".format(prime_name, p)  )
     return p
     
-def generate_key():
+def generate_key(p,q):
     
     msg = "{} = {}"
-    # Choose two large prime numbers, $p$ and $q$
-    p = choose_prime("p", 5)
-    q = choose_prime("q", 7)
+    # # Choose two large prime numbers, $p$ and $q$
+    # p = choose_prime("p", 5)
+    # q = choose_prime("q", 7)
     
     # then compute $n = pq$
     n = p*q
@@ -153,18 +167,19 @@ def __encryption(m, public_key):
     @return: c: int
     加密过程使用 $e$ , 计算密文 $c$ : 
     
-    c \equiv m^e \pmod n
+    $c \equiv m^e \pmod n$
     '''
-    print("message in numeric: {}".format(m))
+    # print("message in numeric: {}".format(m))
     
 
     
     n,e = public_key.get_public_key()
     
     # m < n
-    assert m < n
+    if m >= n:
+        raise Exception("p and q are too small to encrypte the character!")
     
-    c = int( math.pow(m,e) % n )
+    c = int( pow(m,e) % n )
     if c <= 0:
         c = make_positive(c,n)
         
@@ -184,7 +199,7 @@ def __decryption(c, private_key):
     '''
 
     n,d = private_key.get_private_key()
-    m = int(math.pow(c,d) % n)
+    m = int( pow(c,d) % n)
     if m <= 0:
         m = make_positive(m, n )
     return m
@@ -194,8 +209,8 @@ def encryption( plain_text, public_key):
     plain_text: str
     @return list(str)
     
-    接受字符串, 将每个字符加密为数字形式, 然后返回加密后的字符列表
-    例如: “love”被加密为["543", "2342", "7977", "43223"]
+    接受字符串, 将每个字符按ascii编码为数字, 然后加密为数字形式, 然后返回加密后的数字列表, 并转成同样的字符列表
+    例如: “love”被ascii编码为['108', '111', '118', '101'], 加密为['49', '67', '40', '17']
     '''
     c_list = []
     for character in plain_text:
@@ -203,14 +218,18 @@ def encryption( plain_text, public_key):
         c = __encryption(m, public_key)
         c_list.append( c )
         
-    cypher_text_list =  (map(str, c_list))
+    cypher_text_list =  list(map(str, c_list))
     return cypher_text_list
 
 def decryption( cypher_text_list, private_key):
     '''
     cypher_text_list: list(str)
     @return str
-    接受加密后的字符列表,将每个字符转成数字, 解密成数字, 再转成字符, 拼接起来形成明文字符串
+    
+    接受加密后的字符列表,将每个字符转成数字, 解密成数字, 再解ascii编码成字符, 拼接起来形成明文字符串
+    
+    比如, ['12', '84', '27', '107']被转为[12,84,27, 107], 解密为[108,111,118,101], \\
+    解ascii编码为['l','o','v','e'], 最后返回"love"
     '''
     
     m_list = []
@@ -218,11 +237,11 @@ def decryption( cypher_text_list, private_key):
         return int(numstr)
     
     for cypher_text in cypher_text_list:
-        c = numstr2num(cypher_text) # "541"变成543
+        c = numstr2num(cypher_text) # "49"变成49
         
-        m = __decryption(c,private_key)# 543 ->‘l’的数字形式
+        m = __decryption(c,private_key)# 49(密文) ->‘l’的ascii编码(也就是明文) == 108
         m_list.append( m )
-    plain_text_list = map(numeric2letter, m_list) # ['l', 'o', 'v', 'e']的数字形式 -> ['l', 'o', 'v', 'e']
+    plain_text_list = list(map(numeric2letter, m_list)) # ['l', 'o', 'v', 'e']的数字形式 -> ['l', 'o', 'v', 'e']
     
     return ''.join(plain_text_list) # ['l', 'o', 'v', 'e'] -> 'love'
         
@@ -235,8 +254,8 @@ def parse_args():
     group.add_argument("-E", "--encrypt", action="store_true", help="encrypt message using generated public key" )
     group.add_argument("-D", "--decrypt", action="store_true", help="decrypt message using generated private key" )
     
-    # parser.add_argument("--p", help="p", type=int)
-    # parser.add_argument("--q", help="q", type=int)
+    parser.add_argument("--p", help="p", type=int)
+    parser.add_argument("--q", help="q", type=int)
     parser.add_argument("--n", help="n", type=int)
     parser.add_argument("--e", help="e", type=int)
     parser.add_argument("--d", help="d", type=int)
@@ -247,36 +266,52 @@ def parse_args():
     return args
 
 def main():
-
-    
+    # public_key, private_key = generate_key()
+ 
     args = parse_args()
     
-    done_msg = "{0} = {1}"
+    done_msg = "{0}: {1}"
     if args.generate:
         print("Generating keys...")
+        # Choose two large prime numbers, $p$ and $q$
+        p = args.p
+        q = args.q
         
-        public_key, private_key = generate_key()
+        def check_prime(prime_name, p):
+            '''
+            let user choose q and p.
+            NB: n = p*q should larger than any character which user inputs. \\
+            So you had better make p and q may  as larger as possible.
+            '''
+            print("{} = {}".format(prime_name, p))     
+            if not is_prime(p) or p <= 17:
+                raise Exception("{0} must be a large prime, your input is {1}".format(prime_name, p)  )
+        
+        check_prime("p",p)
+        check_prime("q",q)
+        
+        public_key, private_key = generate_key(p,q)
         print(done_msg.format("public_key",public_key))
         print(done_msg.format("private_key",private_key))
 
     if args.encrypt:
         print("Encrypting...")
-        public_key = Public_Key( args.n, args.e )
-        plain_text = int(args.plain_text)
-        cypher_text = encryption(plain_text,public_key)
-        # cypher_text = __encryption(plain_text,public_key)
         
+
+        public_key = Public_Key( args.n, args.e )
+        plain_text = args.plain_text
+        cypher_text = encryption(plain_text,public_key)      
         print( done_msg.format("cypher_text", cypher_text))
     
     if args.decrypt:
         print("Decrypting...")
+        
         private_key = Private_Key( args.n, args.d )
         cypher_text = args.cypher_text
         print( done_msg.format("input cypher_text", cypher_text))
         
-        #plain_text = __decryption( int(cypher_text[0]), private_key )
-        
         plain_text = decryption( cypher_text, private_key )
+        
         print( done_msg.format("plain_text", plain_text))
         
         
