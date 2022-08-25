@@ -68,8 +68,11 @@ def compute_phi_n(n):
     
     return len(co_primes)
 
-# 用于扩展欧几里得算法的 Python 程序
+
 def extended_gcd(a, b):
+    '''
+    扩展欧几里得算法
+    '''
     if a == 0:
         return b, 0, 1
     else:
