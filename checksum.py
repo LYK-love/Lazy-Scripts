@@ -2,7 +2,7 @@
 4-byte checksum for message
 
 ------------------------------------------------------------
-It shows how weak checksum is this its incapable of being \\
+It shows how weak checksum is thus it's incapable of being \\
     a cryptographic hash function
 
 e.g.
