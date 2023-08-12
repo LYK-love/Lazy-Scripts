@@ -26,6 +26,20 @@ def split_pdf(input_file, output_file_1, output_file_2, index):
             writer_2.write(output_2)
 
 
+
+def merge_pdfs_together(input_files, output_file):
+    '''
+    合并多个PDF文件为一个PDF文件
+    '''
+    pdf_merger = PyPDF2.PdfMerger()
+
+    for pdf_file in input_files:
+        with open(pdf_file, 'rb') as file:
+            pdf_merger.append(file)
+
+    with open(output_file, 'wb') as output:
+        pdf_merger.write(output)
+
 def merge_pdfs(input_file_A, input_file_B, output_file, index):
     """
     Merge PDF file B to  PDF file A by given {index}.
@@ -62,11 +76,6 @@ def merge_pdfs(input_file_A, input_file_B, output_file, index):
 
 if __name__ == "__main__":
 
-    # action = input(f'''Please select operation: split, merge
-    # split: {split_pdf.__doc__}
-    # merge: {merge_pdfs.__doc__}
-    # '''
-    #                )
 
     # 创建可补全的选项列表
     function_completer = WordCompleter(["split", "merge"])
@@ -77,6 +86,7 @@ if __name__ == "__main__":
     print(f'''Operations:
     split: {split_pdf.__doc__}
     merge: {merge_pdfs.__doc__}
+    merge_pdfs_together: {merge_pdfs_together.__doc__}
     '''
           )
 
@@ -101,6 +111,16 @@ if __name__ == "__main__":
         index = int(session.prompt("请输入index: ", default="1"))
 
         merge_pdfs(input_file_1, input_file_2, output_file, index)
+    elif function == "merge_pdfs_together":
+        input_file_1 = session.prompt("请输入pdf文档A的路径: ",
+                                      default='/Users/lyk/Desktop/Eng1.pdf')
+        input_file_2 = session.prompt("请输入pdf文档B的路径: ",
+                                      default='/Users/lyk/Desktop/Eng2.pdf')
+        input_file_3 = session.prompt("请输入pdf文档C的路径: ",
+                                      default='/Users/lyk/Desktop/Eng3.pdf')
+        output_file = session.prompt("请输入合并后的pdf文档的路径: ", default='Transcript.pdf')
+        input_files = [input_file_1, input_file_2, input_file_3]
+        merge_pdfs_together(input_files, output_file)
 
     # if action == "split":
     #     # input_file = '/Users/lyk/Documents/Research/毕设/诚信承诺书+三页表 扫描版.pdf'
