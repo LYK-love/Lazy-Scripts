@@ -3,6 +3,7 @@ from urllib.parse import quote
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import WordCompleter
+import pyclip
 
 '''
 https://help.aliyun.com/document_detail/39607.html
@@ -67,7 +68,7 @@ if __name__ == "__main__":
     Utils for Aliyun OSS.
     
     Operations:
-    generate_image_url: {generate_image_url.__doc__}
+    * generate_image_url: {generate_image_url.__doc__}
     '''
           )
 
@@ -81,6 +82,9 @@ if __name__ == "__main__":
         image_path = session.prompt("Please enter your image path under the bucket: ", default='XX/XX.png')
         share_link = generate_image_url(image_path, BucketName, Endpoint)
         print(f"Link: {share_link}")
+
+        print("The text has been copied to your clipboard")
+        pyclip.copy(share_link)
 
     else:
         print("Feature not supported.")
