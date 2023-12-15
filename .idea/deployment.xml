@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="lyk@8.tcp.us-cal-1.ngrok.io:14728 agent">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/lyk/Projects/Lazy_Scripts" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="lyk@8.tcp.us-cal-1.ngrok.io:14728 agent (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/lyk/Projects/Lazy Scripts" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>

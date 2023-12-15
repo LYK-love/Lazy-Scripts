@@ -4,6 +4,4 @@
 
 My scripts for daily life and development.
 
-- 根据我的人生经验，把一些常用的 workflow 写成脚本可以极大地改善我的生活
-
 - The languanges are mainly Python, Bash and Go since I using them mainly when writing scripts

@@ -1,17 +1,15 @@
-# 用于扩展欧几里得算法的 Python 程序
 
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import signal
 
-
-def extended_gcd(a, b):
-    if a == 0:
-        return b, 0, 1
-    else:
-        gcd, x, y = extended_gcd(b % a, a)
-        return gcd, y - (b // a) * x, x
- 
- 
-if __name__ == '__main__':
- 
-    gcd, x, y = extended_gcd(119, 120)
-    print('The GCD is', gcd)
-    print(f'x = {x}, y = {y}')
+if __name__ == "__main__":
+    Ts = 0.01  # units are seconds
+    duration = 0.3
+    tt = np.arange(0, duration, Ts)
+    Fo = 380  # units are Hz
+    xn = 2 * np.cos(2 * np.pi * Fo * tt + 0.6 * np.pi)
+    f = plt.figure()
+    plt.stem(np.arange(len(xn)), xn)
+    plt.grid(True)
+    plt.show()
