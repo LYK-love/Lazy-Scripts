@@ -156,7 +156,7 @@ if __name__ == "__main__":
         DirectoryRelativePath = session.prompt("Your local relative path under the local root: ", default='Algorithm')
         upload_images_to_oss(DirectoryRoot, DirectoryRelativePath, BucketName)
 
-        print("Link for sharing:")
+        print("Link(s) for sharing:")
         DirectoryPath = os.path.join(DirectoryRoot,DirectoryRelativePath)
         image_paths = __get_image_paths(DirectoryPath)
         for image_path in image_paths:
