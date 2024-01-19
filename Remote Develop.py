@@ -3,7 +3,7 @@ import os
 
 if __name__ == "__main__":
     '''
-    Trainslate files on remote server to local machine.
+    Translate (.mp4) files on remote server to local machine.
     You need to set following env variables:
     LAB_IP = <you server's hostname or ip>
     LAB_USERNAME = <the username of your user account on your server>
